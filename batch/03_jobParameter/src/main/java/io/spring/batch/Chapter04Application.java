@@ -1,5 +1,6 @@
 package io.spring.batch;
 
+import io.spring.batch.com.ParameterValidator;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.annotation.BeforeWrite;
@@ -8,6 +9,8 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.CompositeJobParametersValidator;
+import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+
+import java.util.Arrays;
 
 @EnableBatchProcessing
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
@@ -28,10 +33,28 @@ public class Chapter04Application {
 	private StepBuilderFactory stepBuilderFactory;
 
 	@Bean
+	public CompositeJobParametersValidator validator() {
+		CompositeJobParametersValidator validator = new CompositeJobParametersValidator();
+
+		DefaultJobParametersValidator defaultJobParametersValidator =
+				new DefaultJobParametersValidator(
+								new String[] {"fileName"},
+								new String[] {"name"});
+
+		defaultJobParametersValidator.afterPropertiesSet();
+
+		validator.setValidators(
+				Arrays.asList(new ParameterValidator(), defaultJobParametersValidator));
+
+		return validator;
+	}
+
+	@Bean
 	public Job job() {
 		return this.jobBuilderFactory.get("basicJob")
 //				.start(step1())
 				.start(step2())
+				.validator(validator())
 				.build();
 	}
 
@@ -59,7 +82,7 @@ public class Chapter04Application {
 	@Bean
 	public Step step2() {
 		return this.stepBuilderFactory.get("step2")
-				.tasklet(lateBindingChapter04Tasklet(null))
+				.tasklet(lateBindingChapter04Tasklet(null, null))
 				.build();
 	}
 
@@ -68,9 +91,14 @@ public class Chapter04Application {
 	@StepScope
 	@Bean
 	public Tasklet lateBindingChapter04Tasklet(
-			@Value("#{jobParameters['name']}") String name) {
+			@Value("#{jobParameters['name']}") String name,
+			@Value("#{jobParameters['fileName']}") String fileName) {
+
 		return (contribution, chunkContext) -> {
+
 			System.out.println(String.format("Hello, %s", name));
+			System.out.println(String.format("fileName = %s", fileName));
+
 			return RepeatStatus.FINISHED;
 		};
 	}
