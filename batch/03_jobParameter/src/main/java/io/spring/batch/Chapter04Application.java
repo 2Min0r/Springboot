@@ -1,5 +1,6 @@
 package io.spring.batch;
 
+import io.spring.batch.com.DailyJobTimestamper;
 import io.spring.batch.com.ParameterValidator;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -11,6 +12,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,7 @@ import org.springframework.context.annotation.Bean;
 import java.util.Arrays;
 
 @EnableBatchProcessing
-@SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
+@SpringBootApplication
 public class Chapter04Application {
 
 	@Autowired
@@ -39,7 +41,7 @@ public class Chapter04Application {
 		DefaultJobParametersValidator defaultJobParametersValidator =
 				new DefaultJobParametersValidator(
 								new String[] {"fileName"},
-								new String[] {"name"});
+								new String[] {"name", "run.id", "currentDate"});
 
 		defaultJobParametersValidator.afterPropertiesSet();
 
@@ -55,6 +57,8 @@ public class Chapter04Application {
 //				.start(step1())
 				.start(step2())
 				.validator(validator())
+				.incrementer(new RunIdIncrementer())
+				.incrementer(new DailyJobTimestamper())
 				.build();
 	}
 
