@@ -76,7 +76,7 @@ public class CustomService {
 #### 3) SystemCommandTasklet
 1. 시스템 명령을 실행할 때 사용
 2. 시스템 명령은 **비동기**로 실행 -> 타임아웃 값 중요(ms)
-> TODO : 실습으로 해보기
+> Commit: 008. Advanced System Command Job
 
 ### 2. 청크 기반 스텝
 #### 1) 청크
@@ -101,6 +101,7 @@ public Step step1() {
       1. `SimpleCopletionPolicy`: 처리된 아이템 개수가 임곗값에 도달하면 청크 완료
       2. `TimeoutTermiantionPolicy`: 처리 시간이 해당 시간이 넘어갈 때 완료된 것으로 간주하고 모든 트랜잭션 처리
       3. `CompositeCompletiontPolicy`: 청크 완료 여부를 여러 정책 함께 구성가능
+      4. [org.springframework.batch.repeat.policy](https://docs.spring.io/spring-batch/docs/current/api/org/springframework/batch/repeat/policy/package-summary.html)
    ```java
 @Bean
 public Step chunkStep() {
