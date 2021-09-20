@@ -76,4 +76,58 @@ public class CustomService {
 #### 3) SystemCommandTasklet
 1. 시스템 명령을 실행할 때 사용
 2. 시스템 명령은 **비동기**로 실행 -> 타임아웃 값 중요(ms)
-> 실습으로 해보기
+> TODO : 실습으로 해보기
+
+### 2. 청크 기반 스텝
+#### 1) 청크
+   - 커밋 간격에 의해 정의됨
+   - 중요한 이유
+     1. 커밋 간격을 바탕으로 아이템을 처리하고 씀
+     2. 청크마다 잡의 상태가 JobRepository에 갱신됨
+     3. 어느정도 크게 설정하는 것이 성능에 좋음
+```java
+@Bean
+public Step step1() {
+    return this.stepBuilderFactory.get("step1")
+        .<String, String>chunk(10)
+        .reader(itemReader(null))
+        .writer(itemWriter(null))
+        .build();
+        }
+```
+#### 2) 청크 크기
+   1. 하드 코딩하여 청크 크기 설정
+   2. `org.springframework.batch.repeat.CompletionPolicy`로 청크 완료 시점 정의(유동적)
+      1. `SimpleCopletionPolicy`: 처리된 아이템 개수가 임곗값에 도달하면 청크 완료
+      2. `TimeoutTermiantionPolicy`: 처리 시간이 해당 시간이 넘어갈 때 완료된 것으로 간주하고 모든 트랜잭션 처리
+      3. `CompositeCompletiontPolicy`: 청크 완료 여부를 여러 정책 함께 구성가능
+   ```java
+@Bean
+public Step chunkStep() {
+    return this.stepBuilderFactory.get("chunkStep")
+        .<String, String>chunk(completionPolicy())
+        .reader(itemReader())
+        .writer(itemWriter())
+        .build();
+        }
+
+@Bean
+public CompletionPolicy completionPolicy() {
+    CompositeCompletionPolicy policy = new CompositeCompletionPolicy();
+    policy.setPolicies(new CompletionPolicy[] {
+            new TimeoutTerminationPolicy(3),
+            new SimpleCompletionPolicy(1000)
+        });
+    return policy;
+        }
+   ```
+> TODO : 실습으로 해보기
+
+#### 3) CompletionPolicy
+1. `start` 메서드: 청크 시작시 해당 구현체가 필요로 하는 모든 내부 상태 초기화
+2. `update` 메서드: 각 아이템이 처리되면 한 번 씩 호출되면서 내부 상태 갱신
+3. `isComplete` 메서드
+   1. `RepeatContext`를 파라미터로 전달 받아 내부 상태를 이용해 청크 완료 판단
+   2. `RepeatContext` 및 `RepeatStatus`를 파라미터로 전달 받아 청크 완료 여부의 상태를 기반으로 판단
+
+> TODO : 실습으로 해보기(랜덤 청크 크기 결정)
