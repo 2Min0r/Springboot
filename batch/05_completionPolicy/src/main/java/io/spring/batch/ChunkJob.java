@@ -1,5 +1,6 @@
 package io.spring.batch;
 
+import io.spring.batch.com.RandomChunkSizePolicy;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -74,7 +75,8 @@ public class ChunkJob {
 		policy.setPolicies(
 				new CompletionPolicy[] {
 						new TimeoutTerminationPolicy(3),
-						new SimpleCompletionPolicy(1000)
+						//new SimpleCompletionPolicy(1000),
+						new RandomChunkSizePolicy()
 				});
 		return policy;
 	}
