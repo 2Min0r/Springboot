@@ -122,7 +122,7 @@ public CompletionPolicy completionPolicy() {
     return policy;
         }
    ```
-> TODO : 실습으로 해보기
+> Commit: 009. Completion Policy
 
 #### 3) CompletionPolicy
 1. `start` 메서드: 청크 시작시 해당 구현체가 필요로 하는 모든 내부 상태 초기화
@@ -131,4 +131,16 @@ public CompletionPolicy completionPolicy() {
    1. `RepeatContext`를 파라미터로 전달 받아 내부 상태를 이용해 청크 완료 판단
    2. `RepeatContext` 및 `RepeatStatus`를 파라미터로 전달 받아 청크 완료 여부의 상태를 기반으로 판단
 
-> TODO : 실습으로 해보기(랜덤 청크 크기 결정)
+> Commit: 010. Random Chunk Size Policy
+
+## 스텝 리스너
+### 종류
+1. StepExecutionListener
+   - beforeStep
+   - afterStep: ExitStatus 반환 (잡 처리 성공 여부 판별 가능)
+2. ChunkListener
+   - beforeChunk
+   - afterChunk
+
+모두 void 값을 반환하며, 각 애너테이션 제공함
+> Commit: 011. StepExecutionListener

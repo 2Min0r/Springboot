@@ -1,5 +1,6 @@
 package io.spring.batch;
 
+import io.spring.batch.com.LoggingStepStartStopListener;
 import io.spring.batch.com.RandomChunkSizePolicy;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -44,6 +45,7 @@ public class ChunkJob {
 				.<String, String>chunk(completionPolicy())
 				.reader(itemReader())
 				.writer(itemWriter())
+				.listener(new LoggingStepStartStopListener())
 				.build();
 	}
 
