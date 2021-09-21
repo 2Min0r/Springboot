@@ -144,3 +144,26 @@ public CompletionPolicy completionPolicy() {
 
 모두 void 값을 반환하며, 각 애너테이션 제공함
 > Commit: 011. StepExecutionListener
+
+## 스텝 플로우
+### 1. 조건 로직
+스텝의 성공/실패 여부에 따라 실행할 스텝 지정
+1. `on` 메서드: 스프링 배치가 스텝의 `ExitStatus`를 평가하여 어떤 일을 수행할지 결정할 수 있도록 구성가능 
+   1. 와일드카드
+      - `*`: 0개 이상의 문자를 일치시킨다
+      - `?`: 1개의 문자를 일치 시킨다
+```java
+   @Bean
+   public Job listenerJob() {
+   return this.jobBuilderFactory.get("listenerJob")
+   .start(firstStep())
+   .on("FAILED").to(failureStep())
+   .from(firstStep()).on("*").to(successStep())
+   .end()
+   .build();
+   }
+```
+> Commit: 012. ExitStatus Step
+2. `JobExecutionDecider` 인터페이스 구현: `JobExecution`과 `StepExecution`을 전달받아 `FlowExecutionStaus`를 반환
+    - `FlowExecutionStatus`: `BatchStatus`와 `ExitStatus`의 쌍
+    - `ExitStatus`만으로 판단이 부족한 경우 사용
