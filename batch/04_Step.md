@@ -167,3 +167,4 @@ public CompletionPolicy completionPolicy() {
 2. `JobExecutionDecider` 인터페이스 구현: `JobExecution`과 `StepExecution`을 전달받아 `FlowExecutionStaus`를 반환
     - `FlowExecutionStatus`: `BatchStatus`와 `ExitStatus`의 쌍
     - `ExitStatus`만으로 판단이 부족한 경우 사용
+> Commit: 013. Random JobExecutionDecider
