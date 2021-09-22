@@ -28,8 +28,8 @@ public class ConditionalJob {
 	@Bean
 	public Tasklet passTasklet() {
 		return ((stepContribution, chunkContext) -> {
-			return RepeatStatus.FINISHED;
-//			throw new RuntimeException("This is a failure");
+			//return RepeatStatus.FINISHED;
+			throw new RuntimeException("This is a failure");
 		});
 	}
 
@@ -53,10 +53,11 @@ public class ConditionalJob {
 	public Job listenerJob() {
 		return this.jobBuilderFactory.get("listenerJob")
 				.start(firstStep())
-				.next(decider())
-				.from(decider())
-				.on("FAILED").to(failureStep())
-				.from(decider())
+//				.next(decider())
+//				.from(decider())
+				.on("FAILED").stopAndRestart(successStep())
+//				.from(decider())
+				.from(firstStep())
 				.on("*").to(successStep())
 				.end()
 				.build();

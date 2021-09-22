@@ -164,7 +164,47 @@ public CompletionPolicy completionPolicy() {
    }
 ```
 > Commit: 012. ExitStatus Step
+
 2. `JobExecutionDecider` 인터페이스 구현: `JobExecution`과 `StepExecution`을 전달받아 `FlowExecutionStaus`를 반환
     - `FlowExecutionStatus`: `BatchStatus`와 `ExitStatus`의 쌍
     - `ExitStatus`만으로 판단이 부족한 경우 사용
 > Commit: 013. Random JobExecutionDecider
+
+### 2. ExitStatus
+잡을 종료할 때 세 가지 상태로 종료할 수 있으며, 이는 스텝의 `ExitStatus`를 통해 평가하여 식별함
+1. Completed: 동일한 파라미터를 사용하여 재실행 불가
+```java
+@Bean
+public Job job() {
+        return this.jobBuilderFactory.get("job")
+        .start(firstStep())
+        .on("FAILED").end()     // COMPLETED 반환
+        .from(firstStep()).on("*").to(successStep())
+        .end()
+        .build();
+        }
+```
+2. Failed: 동일한 파라미터로 재실행 가능
+```java
+@Bean
+public Job job() {
+        return this.jobBuilderFactory.get("job")
+        .start(firstStep())
+        .on("FAILED").fail()     // FAILED 반환
+        .from(firstStep()).on("*").to(successStep())
+        .end()
+        .build();
+        }
+```
+3. Stopped: 중단된 위치에서 잡 재시작 가능. 스텝 사이에 사람의 개입이 필요하거나, 검사/처리가 필요한 상황에서 유용
+```java
+@Bean
+public Job job() {
+        return this.jobBuilderFactory.get("job")
+        .start(firstStep())
+        .on("FAILED").stopAndRestart(successStep())     // 잡 재시작시 successStep 부터 시작
+        .from(firstStep()).on("*").to(successStep())
+        .end()
+        .build();
+        }
+```
