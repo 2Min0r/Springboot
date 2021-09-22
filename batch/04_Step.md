@@ -208,3 +208,15 @@ public Job job() {
         .build();
         }
 ```
+
+## 플로우 외부화
+재사용 가능한 컴포넌트 형태로 스텝을 사용할 때 사용
+### 1. 스텝의 시퀀스를 독자적으로 구성
+스텝처럼 플로우의 스텝이 잡의 일부분으로 JobRepository에 저장되어 있음. 스텝을 별도로 구성하는 것과 차이 없음.
+### 2. 플로우 스텝
+JobRepository에 플로우가 담긴 스텝을 하나의 스텝처럼 기록됨. 모니터링과 리포팅시 개별 스텝 집계 필요없이 플로우 영향 확인 가능.
+### 3. 잡 스텝
+외부 잡을 호출하는 스텝용 JobExecutionContext를 생성하여 잡 내에서 다른 잡을 호출함.
+- 배치 중지나 미실행 등 실행 처리 제어에 제약이 있을 수 있으므로 미사용 추천
+- `spring.batch.job.names=conditionalStepLogicJob` application.properties 내 설정 필요
+> TODO: JobRepository 후 필요시 실습
